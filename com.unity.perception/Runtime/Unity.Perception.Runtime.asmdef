@@ -9,7 +9,11 @@
         "Unity.RenderPipelines.Core.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.Simulation.Core"
+        "Unity.Simulation.Core",
+        "Unity.Robotics.ROSTCPConnector",
+        "Unity.Robotics.ROSTCPConnector.Messages",
+        "Unity.Robotics.ROSTCPConnector.MessageGeneration",
+        "UnitySensorsROSRuntime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
