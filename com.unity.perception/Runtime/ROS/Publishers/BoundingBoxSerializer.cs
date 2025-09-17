@@ -1,47 +1,51 @@
 using System.Collections;
 using System.Collections.Generic;
-using System;
 using UnityEngine;
-using UnityEngine.Perception.GroundTruth;
-using UnityEngine.Perception.GroundTruth.Labelers;
+using UnitySensors.ROS.Serializer;
 using RosMessageTypes.Vision;
+using UnityEngine.Perception.GroundTruth;
+using UnitySensors.ROS.Serializer.Std;
+using RosMessageTypes.BuiltinInterfaces;
 using RosMessageTypes.Std;
 using Unity.Robotics.ROSTCPConnector;
-using UnitySensors.ROS.Utils.Namespacing;
-using RosMessageTypes.BuiltinInterfaces;
+using UnityEngine.Perception.GroundTruth.Labelers;
 using UnitySensors.ROS.Utils.Time;
-using UnityEngine.Assertions;
 
 namespace UnityEngine.Perception.ROS
 {
-    [RequireComponent(typeof(PerceptionCamera))]
-    public class PublishBoundingBox : MonoBehaviour
-    {       
-        List<CameraLabeler> m_Labelers;
-        ROSConnection m_RosConnection;
-        ROSClock m_RosClock;
-
-        [SerializeField, Tooltip("The topic name to publish bounding box data to. If the topic name does not start with a '/', the namespace of this GameObject will be prepended to the topic name.")]
-        string m_Topic = "detection/bounding_boxes";
-
+    [System.Serializable]
+    public class BoundingBoxSerializer : RosMsgSerializer<BoundingBoxArrayMsg>
+    {
         [SerializeField, Tooltip("You need to edit this according to the resolution that you set for your display game.")]
-        Vector2 m_ImageSize;
+        private Vector2 m_ImageSize;
+        public Vector2 ImageSize { get => m_ImageSize; set => m_ImageSize = value; }
 
-        void Start()
+        [SerializeField]
+        private PerceptionCamera m_PerceptionCamera;
+        [SerializeField, Tooltip("Probability that a detection will be published. To simulate real life uncertainty.")]
+        private float m_ConfidenceRate = 0.8f;
+        [SerializeField]
+        private HeaderSerializer m_Header;
+        public PerceptionCamera Perception_Camera { get => m_PerceptionCamera; set => m_PerceptionCamera = value; }
+        public HeaderSerializer Header { get => m_Header; set => m_Header = value; }
+
+        List<CameraLabeler> m_Labelers;
+
+        public override void Init()
         {
-            PerceptionCamera perceptionCamera = GetComponent<PerceptionCamera>();
-            m_Labelers = perceptionCamera.Labelers;
-
-            m_RosConnection = ROSConnection.GetOrCreateInstance();
-            m_Topic = NamespaceUtils.GetResolvedTopicName(m_Topic, this.gameObject);
-            m_RosConnection.RegisterPublisher<BoundingBoxArrayMsg>(m_Topic);
-
-            m_RosClock = FindObjectOfType<ROSClock>();
-            Assert.IsNotNull(m_RosClock, "No ROSClock found in the scene. Please add one to publish time data.");
+            base.Init();
+            m_Header.Init();
+            m_Labelers = m_PerceptionCamera.Labelers;
         }
 
-        void Update()
+        public override BoundingBoxArrayMsg Serialize()
         {
+            _msg.header = m_Header.Serialize();
+            _msg.bounding_boxes = new BoundingBoxMsg[0];
+
+            if (!m_PerceptionCamera.enabled)
+                return _msg;
+
             foreach (var labeler in m_Labelers)
             {
                 if (labeler is not BoundingBox2DLabeler) continue;
@@ -53,6 +57,8 @@ namespace UnityEngine.Perception.ROS
 
                 foreach (var annotation in annotations)
                 {
+                    if (Random.Range(0f, 1f) > m_ConfidenceRate) continue; // Simulate confidence rate (some boxes are not detected)
+
                     // Original pixel-based values
                     Vector2 dimension = annotation.dimension;
                     Vector2 origin = annotation.origin;
@@ -78,23 +84,11 @@ namespace UnityEngine.Perception.ROS
                     bounding_boxes.Add(boundingBoxMsg);
 
                     //Debug.Log($"Label: {labelName}, ID: {labelId}, Normalized Origin: ({normalizedCenter.x}, {normalizedCenter.y}), Normalized Dimension: ({normalizedDimension.x}, {normalizedDimension.y})");
-                }
-
-                BoundingBoxArrayMsg boundingBoxArrayMsg = new BoundingBoxArrayMsg
-                {
-                    header = new HeaderMsg
-                    {
-                        stamp = new TimeMsg
-                        {
-                            sec = m_RosClock.Sec,
-                            nanosec = m_RosClock.Nanosec
-                        }
-                    },
-                    bounding_boxes = bounding_boxes.ToArray()
-                };
-                m_RosConnection.Publish(m_Topic, boundingBoxArrayMsg);
+                }              
+                _msg.bounding_boxes = bounding_boxes.ToArray();
             }
+            return _msg;
         }
     }
-}
 
+}
