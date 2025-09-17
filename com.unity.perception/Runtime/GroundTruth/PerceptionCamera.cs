@@ -35,6 +35,8 @@ namespace UnityEngine.Perception.GroundTruth
         [SerializeField]
         LayerMask m_LayerMask = -1;
 
+        public List<CameraLabeler> Labelers => m_Labelers;
+
         bool m_BegunCapturingData;
         bool m_SimulationEnded;
         bool m_ShowingVisualizations;

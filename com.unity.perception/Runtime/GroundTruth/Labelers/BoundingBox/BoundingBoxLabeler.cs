@@ -41,6 +41,7 @@ namespace UnityEngine.Perception.GroundTruth.Labelers
 
         Dictionary<int, (AsyncFuture<DataModel.Annotation> annotation, LabelEntryMatchCache labelEntryMatchCache)> m_AsyncData;
         List<BoundingBox> m_ToVisualize;
+        public List<BoundingBox> Annotations => m_ToVisualize;
 
         Vector2 m_OriginalScreenSize = Vector2.zero;
 
