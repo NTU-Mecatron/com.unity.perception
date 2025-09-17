@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Perception.GroundTruth.Consumers;
 using UnityEngine.Perception.GroundTruth.DataModel;
@@ -26,6 +27,28 @@ namespace UnityEngine.Perception.GroundTruth
 
         internal static SimulationState currentSimulation => m_ActiveSimulation ?? (m_ActiveSimulation = CreateSimulationData());
 
+        static Dictionary<string, SimulationState> m_Simulations = new();
+
+        internal static SimulationState GetSimulation(string cameraId)
+        {
+            if (!m_Simulations.TryGetValue(cameraId, out var sim))
+            {
+                sim = CreateSimulationData();
+                m_Simulations[cameraId] = sim;
+            }
+            return sim;
+        }
+
+        // Allow cleanup per camera
+        public static void ResetSimulation(string cameraId)
+        {
+            if (m_Simulations.TryGetValue(cameraId, out var sim))
+            {
+                sim.CleanUp();
+                sim.End();
+                m_Simulations.Remove(cameraId);
+            }
+        }
         /// <summary>
         /// The json metadata schema version the DatasetCapture's output conforms to.
         /// </summary>

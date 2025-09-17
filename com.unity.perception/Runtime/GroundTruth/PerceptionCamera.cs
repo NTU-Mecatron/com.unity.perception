@@ -512,6 +512,9 @@ namespace UnityEngine.Perception.GroundTruth
                     if (postProcessChannel.preprocessTexture != null)
                         postProcessChannel.preprocessTexture.Release();
             }
+
+            DatasetCapture.ResetSimulation(id);
+
         }
 
         void EnsureSensorRegistered()
@@ -521,34 +524,60 @@ namespace UnityEngine.Perception.GroundTruth
                 m_SensorDefinition = new RgbSensorDefinition(id, captureTriggerMode, description, firstCaptureFrame,
                     framesBetweenCaptures, manualSensorAffectSimulationTiming, "camera", simulationDeltaTime, useAccumulation);
                 SensorHandle = DatasetCapture.RegisterSensor(m_SensorDefinition);
+
+                var sim = DatasetCapture.GetSimulation(id);
+                SensorHandle = sim.AddSensor(m_SensorDefinition, m_SensorDefinition.simulationDeltaTime);
             }
         }
 
-        void SetupVisualizationCamera()
+        public void SetupVisualizationCamera()
         {
 #if !UNITY_EDITOR && !DEVELOPMENT_BUILD
-            showVisualizations = false;
+    showVisualizations = false;
 #else
-            var visualizationAllowed = visualizedPerceptionCamera == null;
+    if (!showVisualizations)
+        return;
+            //var visualizationAllowed = visualizedPerceptionCamera == null;
 
-            if (!visualizationAllowed && showVisualizations)
-            {
-                Debug.LogWarning("Currently only one PerceptionCamera may be visualized at a time. " +
-                    $"Disabling visualization on {gameObject.name}.");
-                showVisualizations = false;
-                return;
-            }
-            if (!showVisualizations)
-                return;
+            //if (!visualizationAllowed && showVisualizations)
+            //{
+            //    Debug.LogWarning("Currently only one PerceptionCamera may be visualized at a time. " +
+            //        $"Disabling visualization on {gameObject.name}.");
+            //    showVisualizations = false;
+            //    return;
+            //}
+            // NEW – allow all cameras to visualize
 
-            m_ShowingVisualizations = true;
-            visualizedPerceptionCamera = this;
+            //if (!showVisualizations)
+            //    return;
+    DestroyAllOverlayCanvases();
 
-            hudPanel = gameObject.AddComponent<HUDPanel>();
-            overlayPanel = gameObject.AddComponent<OverlayPanel>();
-            overlayPanel.perceptionCamera = this;
+    if (hudPanel != null || overlayPanel != null)
+        return;
+
+    m_ShowingVisualizations = true;
+    visualizedPerceptionCamera = this;
+
+    hudPanel = gameObject.AddComponent<HUDPanel>();
+    overlayPanel = gameObject.AddComponent<OverlayPanel>();
+    overlayPanel.perceptionCamera = this;
+
+    FixOverlayCanvasDisplay(attachedCamera);
 #endif
         }
+
+        public void SetVisualizationActive(bool active)
+        {
+            if (active && !m_ShowingVisualizations)
+            {
+                SetupVisualizationCamera();
+            }
+            else if (!active && m_ShowingVisualizations)
+            {
+                CleanupVisualization();
+            }
+        }
+
 
         void SetUpGUIStyles()
         {
@@ -731,10 +760,46 @@ namespace UnityEngine.Perception.GroundTruth
 
         void CleanupVisualization()
         {
+            if (hudPanel != null) Destroy(hudPanel);
+            if (overlayPanel != null) Destroy(overlayPanel);
+
+            hudPanel = null;
+            overlayPanel = null;
+
+            DestroyAllOverlayCanvases();
+
+            m_ShowingVisualizations = false;
             if (visualizedPerceptionCamera == this)
-            {
                 visualizedPerceptionCamera = null;
+
+            UnityEngine.Debug.Log($"[PerceptionCamera] Visualization cleaned up for {gameObject.name}");
+        }
+
+        public static void DestroyAllOverlayCanvases()
+        {
+            var canvases = UnityEngine.Object.FindObjectsOfType<Canvas>(true);
+            foreach (var c in canvases)
+            {
+                if (c != null && c.name == "overlay_canvas")
+                    UnityEngine.Object.Destroy(c.gameObject);
             }
         }
+
+        private void FixOverlayCanvasDisplay(Camera activeCam)
+        {
+            var canvases = UnityEngine.Object.FindObjectsOfType<Canvas>(true);
+            foreach (var c in canvases)
+            {
+                if (c != null && c.name == "overlay_canvas")
+                {
+                    c.targetDisplay = activeCam.targetDisplay;
+
+                    if (c.renderMode == RenderMode.ScreenSpaceCamera)
+                        c.worldCamera = activeCam;
+                }
+            }
+        }
+
+
     }
 }
