@@ -9,6 +9,9 @@ namespace UnityEngine.Perception.Utilities
         [SerializeField] Camera m_Cam1;
         [SerializeField] Camera m_Cam2;
 
+        [Tooltip("Key to switch the camera.")]
+        [SerializeField] KeyCode _switchKey = KeyCode.Tab;
+
         private PerceptionCamera m_Pcam1;
         private PerceptionCamera m_Pcam2;
         private bool m_UsingFirst = true;
@@ -21,6 +24,15 @@ namespace UnityEngine.Perception.Utilities
             // Start with cam1 active
             ActivateCamera(m_Cam1, m_Pcam1, m_UsingFirst);
             ActivateCamera(m_Cam2, m_Pcam2, !m_UsingFirst);
+        }
+
+        private void Update()
+        {
+            // Check if the launch key is pressed
+            if (Input.GetKeyDown(_switchKey))
+            {
+                SwitchCamera(); // Trigger the actuator
+            }
         }
 
         public void SwitchCamera()
