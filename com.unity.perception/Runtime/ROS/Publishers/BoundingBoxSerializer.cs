@@ -5,11 +5,7 @@ using UnitySensors.ROS.Serializer;
 using RosMessageTypes.Vision;
 using UnityEngine.Perception.GroundTruth;
 using UnitySensors.ROS.Serializer.Std;
-using RosMessageTypes.BuiltinInterfaces;
-using RosMessageTypes.Std;
-using Unity.Robotics.ROSTCPConnector;
 using UnityEngine.Perception.GroundTruth.Labelers;
-using UnitySensors.ROS.Utils.Time;
 
 namespace UnityEngine.Perception.ROS
 {
@@ -52,6 +48,9 @@ namespace UnityEngine.Perception.ROS
 
                 var boundingBoxLabeler = labeler as BoundingBox2DLabeler;
                 var annotations = boundingBoxLabeler.Annotations;
+
+                // No annotations (no objects detected in the frame
+                if (annotations == null || annotations.Count == 0) continue;
 
                 List<BoundingBoxMsg> bounding_boxes = new List<BoundingBoxMsg>();
 
