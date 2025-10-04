@@ -532,38 +532,19 @@ namespace UnityEngine.Perception.GroundTruth
 
         public void SetupVisualizationCamera()
         {
-#if !UNITY_EDITOR && !DEVELOPMENT_BUILD
-    showVisualizations = false;
-#else
-    if (!showVisualizations)
-        return;
-            //var visualizationAllowed = visualizedPerceptionCamera == null;
+            DestroyAllOverlayCanvases();
 
-            //if (!visualizationAllowed && showVisualizations)
-            //{
-            //    Debug.LogWarning("Currently only one PerceptionCamera may be visualized at a time. " +
-            //        $"Disabling visualization on {gameObject.name}.");
-            //    showVisualizations = false;
-            //    return;
-            //}
-            // NEW – allow all cameras to visualize
+            if (hudPanel != null || overlayPanel != null)
+                return;
 
-            //if (!showVisualizations)
-            //    return;
-    DestroyAllOverlayCanvases();
+            m_ShowingVisualizations = true;
+            visualizedPerceptionCamera = this;
 
-    if (hudPanel != null || overlayPanel != null)
-        return;
+            hudPanel = gameObject.AddComponent<HUDPanel>();
+            overlayPanel = gameObject.AddComponent<OverlayPanel>();
+            overlayPanel.perceptionCamera = this;
 
-    m_ShowingVisualizations = true;
-    visualizedPerceptionCamera = this;
-
-    hudPanel = gameObject.AddComponent<HUDPanel>();
-    overlayPanel = gameObject.AddComponent<OverlayPanel>();
-    overlayPanel.perceptionCamera = this;
-
-    FixOverlayCanvasDisplay(attachedCamera);
-#endif
+            FixOverlayCanvasDisplay(attachedCamera);
         }
 
         public void SetVisualizationActive(bool active)
