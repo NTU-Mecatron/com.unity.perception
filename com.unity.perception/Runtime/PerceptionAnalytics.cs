@@ -41,7 +41,7 @@ namespace UnityEngine.Perception.Analytics
 
         static void OnSimulationShutdown()
         {
-            var perceptionCameras = Object.FindObjectsOfType<PerceptionCamera>();
+            var perceptionCameras = Object.FindObjectsByType<PerceptionCamera>(FindObjectsSortMode.InstanceID);
             ReportScenarioInformation(
                 perceptionCameras,
                 ScenarioBase.activeScenario
@@ -95,11 +95,12 @@ namespace UnityEngine.Perception.Analytics
 
             // Try registering the event and update the dictionary accordingly
             s_EventRegistrationStatus[theEvent] = true;
-#if UNITY_EDITOR
-            var status = EditorAnalytics.RegisterEventWithLimit(theEvent.name, k_MaxEventsPerHour, k_MaxElementsInStruct, k_VendorKey);
-#else
+            //#if UNITY_EDITOR
+            //            var status = EditorAnalytics.RegisterEventWithLimit(theEvent.name, k_MaxEventsPerHour, k_MaxElementsInStruct, k_VendorKey);
+            //#else
+            //            var status = UnityEngine.Analytics.Analytics.RegisterEvent(theEvent.name, k_MaxEventsPerHour, k_MaxElementsInStruct, k_VendorKey);
+            //#endif
             var status = UnityEngine.Analytics.Analytics.RegisterEvent(theEvent.name, k_MaxEventsPerHour, k_MaxElementsInStruct, k_VendorKey);
-#endif
             s_EventRegistrationStatus[theEvent] &= status == AnalyticsResult.Ok;
 
             return s_EventRegistrationStatus[theEvent];
@@ -113,17 +114,21 @@ namespace UnityEngine.Perception.Analytics
         /// <param name="data">Payload of the event.</param>
         static void SendPerceptionAnalyticsEvent(AnalyticsEvent theEvent, object data)
         {
-#if UNITY_EDITOR
-            if (theEvent.type == AnalyticsEventType.Editor || theEvent.type == AnalyticsEventType.RuntimeAndEditor)
-            {
-                EditorAnalytics.SendEventWithLimit(theEvent.name, data, theEvent.versionId);
-            }
-#else
+//#if UNITY_EDITOR
+//            if (theEvent.type == AnalyticsEventType.Editor || theEvent.type == AnalyticsEventType.RuntimeAndEditor)
+//            {
+//                EditorAnalytics.SendEventWithLimit(theEvent.name, data, theEvent.versionId);
+//            }
+//#else
+//            if (theEvent.type == AnalyticsEventType.Runtime || theEvent.type == AnalyticsEventType.RuntimeAndEditor)
+//            {
+//                UnityEngine.Analytics.Analytics.SendEvent(theEvent.name, data, theEvent.versionId, theEvent.prefix);
+//            }
+//#endif
             if (theEvent.type == AnalyticsEventType.Runtime || theEvent.type == AnalyticsEventType.RuntimeAndEditor)
             {
                 UnityEngine.Analytics.Analytics.SendEvent(theEvent.name, data, theEvent.versionId, theEvent.prefix);
             }
-#endif
         }
 
         #endregion

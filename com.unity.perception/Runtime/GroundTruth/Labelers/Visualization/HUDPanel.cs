@@ -89,6 +89,12 @@ namespace UnityEngine.Perception.GroundTruth
         {
             if (m_Entries.Count == 0) return;
 
+            // Unity 6 requires proper event handling
+            if (Event.current == null) return;
+            var eventType = Event.current.type;
+            if (eventType != EventType.Layout && eventType != EventType.Repaint)
+                return;
+
             if (!m_GUIStylesInitialized) SetUpGUIStyles();
 
             GUI.depth = 0; // Draw HUD objects on the top of other UI objects
