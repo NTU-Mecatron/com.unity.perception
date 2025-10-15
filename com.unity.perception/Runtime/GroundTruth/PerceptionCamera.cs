@@ -394,7 +394,7 @@ namespace UnityEngine.Perception.GroundTruth
 
         void OnEnable()
         {
-            enabledPerceptionCameras.Add(this);
+            // enabledPerceptionCameras.Add(this);
             cameraSensor.Enable();
             PerceptionUpdater.beginFrameRendering += OnBeginFrameRendering;
             PerceptionUpdater.endFrameRendering += OnEndFrameRendering;
@@ -402,7 +402,7 @@ namespace UnityEngine.Perception.GroundTruth
 
         void OnDisable()
         {
-            enabledPerceptionCameras.Remove(this);
+            // enabledPerceptionCameras.Remove(this);
             cameraSensor.Disable();
             PerceptionUpdater.beginFrameRendering -= OnBeginFrameRendering;
             PerceptionUpdater.endFrameRendering -= OnEndFrameRendering;
