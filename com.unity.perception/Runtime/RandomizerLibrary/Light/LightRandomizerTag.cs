@@ -4,6 +4,8 @@ using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Perception.Randomization.Parameters;
 using UnityEngine.Perception.Randomization.Samplers;
 using UnityEngine.Scripting.APIUpdating;
+using UnityEngine.Rendering;
+using FloatParameter = UnityEngine.Perception.Randomization.Parameters.FloatParameter;
 
 namespace UnityEngine.Perception.Randomization.Randomizers
 {
@@ -157,13 +159,15 @@ namespace UnityEngine.Perception.Randomization.Randomizers
             // Randomize intensity
             if (!specifyIntensityAsList)
             {
-                LightData.SetIntensity(intensity.Sample(), LightData.lightUnit);
+                Light.lightUnit = LightUnit.Lux;
+                Light.intensity = intensity.Sample();
             }
             else
             {
                 if (intensityList.Count > 0)
                 {
-                    LightData.SetIntensity(intensityList.Sample(), LightData.lightUnit);
+                    Light.lightUnit = LightUnit.Lux;
+                    Light.intensity = intensityList.Sample();
                 }
             }
 #endif
