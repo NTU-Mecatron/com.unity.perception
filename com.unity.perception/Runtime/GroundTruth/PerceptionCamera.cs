@@ -758,7 +758,7 @@ namespace UnityEngine.Perception.GroundTruth
 
         public static void DestroyAllOverlayCanvases()
         {
-            var canvases = UnityEngine.Object.FindObjectsOfType<Canvas>(true);
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.InstanceID);
             foreach (var c in canvases)
             {
                 if (c != null && c.name == "overlay_canvas")
@@ -768,7 +768,7 @@ namespace UnityEngine.Perception.GroundTruth
 
         private void FixOverlayCanvasDisplay(Camera activeCam)
         {
-            var canvases = UnityEngine.Object.FindObjectsOfType<Canvas>(true);
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.InstanceID);
             foreach (var c in canvases)
             {
                 if (c != null && c.name == "overlay_canvas")
