@@ -466,28 +466,28 @@ namespace UnityEngine.Perception.GroundTruth
 
             GUI.depth = 0;
 
-            hudPanel.OnDrawGUI();
+            //hudPanel.OnDrawGUI();
 
-            var x = Screen.width - k_PanelWidth - 10;
-            var height = Math.Min(Screen.height * 0.5f - 20, k_PanelHeight);
+            //var x = Screen.width - k_PanelWidth - 10;
+            //var height = Math.Min(Screen.height * 0.5f - 20, k_PanelHeight);
 
-            GUILayout.BeginArea(new Rect(x, 10, k_PanelWidth, height), GUI.skin.box);
+            //GUILayout.BeginArea(new Rect(x, 10, k_PanelWidth, height), GUI.skin.box);
 
-            m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition);
+            //m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition);
 
-            // If a labeler has never been initialized then it was off from the
-            // start, it should not be called to draw on the UI
-            foreach (var labeler in m_Labelers.Where(labeler => labeler.isInitialized))
-            {
-                labeler.VisualizeUI();
-            }
+            //// If a labeler has never been initialized then it was off from the
+            //// start, it should not be called to draw on the UI
+            //foreach (var labeler in m_Labelers.Where(labeler => labeler.isInitialized))
+            //{
+            //    labeler.VisualizeUI();
+            //}
 
-            // This needs to happen here so that the overlay panel controls
-            // are placed in the controls panel
-            overlayPanel.OnDrawGUI(x, 10, k_PanelWidth, height);
+            //// This needs to happen here so that the overlay panel controls
+            //// are placed in the controls panel
+            //overlayPanel.OnDrawGUI(x, 10, k_PanelWidth, height);
 
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
+            //GUILayout.EndScrollView();
+            //GUILayout.EndArea();
         }
 
         void OnDestroy()
