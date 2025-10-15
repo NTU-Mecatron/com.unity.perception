@@ -145,6 +145,12 @@ namespace UnityEngine.Perception.GroundTruth
 
         internal void OnDrawGUI(float x, float y, float width, float height)
         {
+            // Unity 6 requires proper event handling
+            if (Event.current == null) return;
+            var eventType = Event.current.type;
+            if (eventType != EventType.Layout && eventType != EventType.Repaint)
+                return;
+            
             var any = perceptionCamera.labelers.Any(l => l is IOverlayPanelProvider && l.enabled);
 
             // If there used to be active providers, but they have been turned off, remove
