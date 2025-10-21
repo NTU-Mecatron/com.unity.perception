@@ -549,6 +549,7 @@ namespace UnityEngine.Perception.GroundTruth
 
         public void SetVisualizationActive(bool active)
         {
+            showVisualizations = active;
             if (active && !m_ShowingVisualizations)
             {
                 SetupVisualizationCamera();
@@ -556,7 +557,14 @@ namespace UnityEngine.Perception.GroundTruth
             else if (!active && m_ShowingVisualizations)
             {
                 CleanupVisualization();
+                ForceBackgroundDepth();
             }
+        }
+
+        public void ForceBackgroundDepth(float bgDepth = -10f)
+        {
+            if (attachedCamera == null) attachedCamera = GetComponent<Camera>();
+            if (attachedCamera != null) attachedCamera.depth = bgDepth;
         }
 
 

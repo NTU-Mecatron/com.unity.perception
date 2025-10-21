@@ -1,58 +1,80 @@
 using UnityEngine;
 using UnityEngine.Perception.GroundTruth;
-using System.Reflection; // needed for reflection call to CleanupVisualization()
 
 namespace UnityEngine.Perception.Utilities
 {
     public class PerceptionCameraSwitcher : MonoBehaviour
     {
-        [SerializeField] Camera m_Cam1;
-        [SerializeField] Camera m_Cam2;
+        [Header("Assign two cameras (one can be a PerceptionCamera)")]
+        [SerializeField] Camera m_CamA;
+        [SerializeField] Camera m_CamB;
 
-        [Tooltip("Key to switch the camera.")]
+        [Header("Hotkey")]
         [SerializeField] KeyCode _switchKey = KeyCode.Tab;
 
-        private PerceptionCamera m_Pcam1;
-        private PerceptionCamera m_Pcam2;
-        private bool m_UsingFirst = true;
+        [Header("Depth Settings (same Display)")]
+        [SerializeField] int displayIndex = 0;     // Display 1
+        [SerializeField] float foregroundDepth = 10f;
+        [SerializeField] float backgroundDepth = -10f;
+
+        PerceptionCamera _pcamA;
+        PerceptionCamera _pcamB;
+        bool _useA = true;
 
         void Start()
         {
-            if (m_Cam1 != null) m_Pcam1 = m_Cam1.GetComponent<PerceptionCamera>();
-            if (m_Cam2 != null) m_Pcam2 = m_Cam2.GetComponent<PerceptionCamera>();
+            _pcamA = m_CamA ? m_CamA.GetComponent<PerceptionCamera>() : null;
+            _pcamB = m_CamB ? m_CamB.GetComponent<PerceptionCamera>() : null;
 
-            // Start with cam1 active
-            ActivateCamera(m_Cam1, m_Pcam1, m_UsingFirst);
-            ActivateCamera(m_Cam2, m_Pcam2, !m_UsingFirst);
+            ApplyState(_useA);
         }
 
-        private void Update()
+        void Update()
         {
-            // Check if the launch key is pressed
             if (Input.GetKeyDown(_switchKey))
             {
-                SwitchCamera(); // Trigger the actuator
+                _useA = !_useA;
+                ApplyState(_useA);
             }
         }
 
-        public void SwitchCamera()
+        void ApplyState(bool makeAActive)
         {
-            m_UsingFirst = !m_UsingFirst;
-            ActivateCamera(m_Cam1, m_Pcam1, m_UsingFirst);
-            ActivateCamera(m_Cam2, m_Pcam2, !m_UsingFirst);
-        }
+            var activeCam = makeAActive ? m_CamA : m_CamB;
+            var passiveCam = makeAActive ? m_CamB : m_CamA;
+            var activePCam = makeAActive ? _pcamA : _pcamB;
+            var passivePCam = makeAActive ? _pcamB : _pcamA;
 
-        private void ActivateCamera(Camera cam, PerceptionCamera pcam, bool active)
-        {
-            if (cam != null)
-                cam.enabled = active;
-
-            if (pcam != null)
+            // --- Active camera: ON, foreground, visualization ON if it's a PCam ---
+            if (activeCam)
             {
-                pcam.enabled = active;
-                pcam.SetVisualizationActive(active);
+                activeCam.targetDisplay = displayIndex;
+                activeCam.depth = foregroundDepth;
+                activeCam.enabled = true;
+            }
+            if (activePCam)
+            {
+                // Show Labeler Visualization = true (same as ticking the inspector)
+                activePCam.SetVisualizationActive(true);
+                // keep component enabled so it keeps capturing
+                activePCam.enabled = true;
+            }
+
+            // --- Passive camera: OFF, background, visualization OFF if it's a PCam ---
+            if (passiveCam)
+            {
+                passiveCam.targetDisplay = displayIndex;
+                passiveCam.depth = backgroundDepth;
+                passiveCam.enabled = false; // fully off per your requirement
+            }
+            if (passivePCam)
+            {
+                // hide overlays but DO NOT disable the component (keeps capturing)
+                passivePCam.SetVisualizationActive(false);
+                // if you really want it off completely, uncomment next line:
+                // passivePCam.enabled = false;
             }
         }
     }
-
 }
+
