@@ -20,6 +20,8 @@ namespace UnityEngine.Perception.ROS
         private PerceptionCamera m_PerceptionCamera;
         [SerializeField, Tooltip("Probability that a detection will be published. To simulate real life uncertainty.")]
         private float m_ConfidenceRate = 0.8f;
+        public float ConfidenceRate { get => m_ConfidenceRate; set => m_ConfidenceRate = Mathf.Clamp01(value); }
+
         [SerializeField]
         private HeaderSerializer m_Header;
         public PerceptionCamera Perception_Camera { get => m_PerceptionCamera; set => m_PerceptionCamera = value; }
