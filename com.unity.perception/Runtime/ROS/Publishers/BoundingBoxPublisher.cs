@@ -12,6 +12,12 @@ namespace UnityEngine.Perception.ROS
     [RequireComponent(typeof(PerceptionCamera))]
     public class BoundingBoxPublisher : RosMsgPublisher<BoundingBoxSerializer, BoundingBoxArrayMsg>
     {
+        public float ConfidenceRate
+        {
+            get => _serializer.ConfidenceRate;
+            set => _serializer.ConfidenceRate = Mathf.Clamp01(value);
+        }
+
         void Reset()
         {
             _topicName = "detection/bounding_boxes";
