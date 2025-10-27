@@ -549,6 +549,7 @@ namespace UnityEngine.Perception.GroundTruth
 
         public void SetVisualizationActive(bool active)
         {
+            showVisualizations = active;
             if (active && !m_ShowingVisualizations)
             {
                 SetupVisualizationCamera();
@@ -558,7 +559,6 @@ namespace UnityEngine.Perception.GroundTruth
                 CleanupVisualization();
             }
         }
-
 
         void SetUpGUIStyles()
         {
