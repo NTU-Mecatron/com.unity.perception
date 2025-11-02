@@ -25,8 +25,13 @@ namespace UnityEngine.Perception.ROS
             PerceptionCamera perceptionCamera = GetComponent<PerceptionCamera>();
             _serializer.ImageSize = new Vector2(1280, 720);
             _serializer.Perception_Camera = perceptionCamera;
-            _serializer.Header.Source = FindFirstObjectByType<ROSClock>();
             _serializer.Header.FrameId = "camera_link";
+        }
+
+        protected override void Start()
+        {
+            _serializer.Header.Source = FindFirstObjectByType<ROSClock>();
+            base.Start();
         }
     }
 }
