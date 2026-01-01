@@ -44,6 +44,7 @@ namespace UnityEngine.Perception.ROS
             if (!m_PerceptionCamera.enabled)
                 return _msg;
 
+            m_ImageSize = new Vector2(Screen.width, Screen.height);
             foreach (var labeler in m_Labelers)
             {
                 if (labeler is not BoundingBox2DLabeler) continue;

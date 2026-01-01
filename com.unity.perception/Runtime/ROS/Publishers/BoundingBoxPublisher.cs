@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System;
-using UnityEngine;
 using UnityEngine.Perception.GroundTruth;
 using RosMessageTypes.Vision;
 using UnitySensors.ROS.Utils.Time;
