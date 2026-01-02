@@ -12,9 +12,8 @@ namespace UnityEngine.Perception.ROS
     [System.Serializable]
     public class BoundingBoxSerializer : RosMsgSerializer<BoundingBoxArrayMsg>
     {
-        [SerializeField, Tooltip("You need to edit this according to the resolution that you set for your display game.")]
+        [SerializeField]
         private Vector2 m_ImageSize;
-        public Vector2 ImageSize { get => m_ImageSize; set => m_ImageSize = value; }
 
         [SerializeField]
         private PerceptionCamera m_PerceptionCamera;

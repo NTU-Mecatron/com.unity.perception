@@ -19,7 +19,6 @@ namespace UnityEngine.Perception.ROS
             _topicName = "detection/bounding_boxes";
             _frequency = 30.0f;
             PerceptionCamera perceptionCamera = GetComponent<PerceptionCamera>();
-            _serializer.ImageSize = new Vector2(1280, 720);
             _serializer.Perception_Camera = perceptionCamera;
             _serializer.Header.FrameId = "camera_link";
         }
