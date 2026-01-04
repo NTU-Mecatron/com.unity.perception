@@ -9,6 +9,7 @@ using UnityEngine.Perception.GroundTruth.Sensors.Channels;
 using UnityEngine.Perception.GroundTruth.Utilities;
 using UnityEngine.Perception.Randomization.Scenarios;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 #pragma warning disable 649
 
 namespace UnityEngine.Perception.GroundTruth
@@ -27,6 +28,8 @@ namespace UnityEngine.Perception.GroundTruth
 
         internal HUDPanel hudPanel;
         internal OverlayPanel overlayPanel;
+
+        public RawImage outputView;
 
         [SerializeReference]
         CameraSensor m_CameraSensor = new UnityCameraSensor();
@@ -454,7 +457,10 @@ namespace UnityEngine.Perception.GroundTruth
             // start, it should not be called to draw on the UI
             foreach (var labeler in m_Labelers.Where(labeler => labeler.isInitialized))
             {
-                labeler.Visualize();
+                if (outputView != null && attachedCamera.targetTexture != null)
+                    labeler.Visualize(outputView);
+                else
+                    labeler.Visualize();
                 anyLabelerEnabled = true;
             }
 
@@ -752,8 +758,6 @@ namespace UnityEngine.Perception.GroundTruth
             m_ShowingVisualizations = false;
             if (visualizedPerceptionCamera == this)
                 visualizedPerceptionCamera = null;
-
-            UnityEngine.Debug.Log($"[PerceptionCamera] Visualization cleaned up for {gameObject.name}");
         }
 
         public static void DestroyAllOverlayCanvases()

@@ -124,6 +124,7 @@ namespace UnityEditor.Perception.GroundTruth
                     m_SceneStatusUpdateTime = DateTime.Now;
                 }
 
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(perceptionCamera.outputView)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(perceptionCamera.id)), new GUIContent("ID", "Provide a unique sensor ID for the camera."));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(perceptionCamera.description)), new GUIContent("Description", "Provide a description for this camera (optional)."));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(perceptionCamera.showVisualizations)), new GUIContent("Show Labeler Visualizations", "Display realtime visualizations for labelers that are currently active on this camera."));

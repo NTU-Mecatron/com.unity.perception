@@ -1,5 +1,6 @@
 using System;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 namespace UnityEngine.Perception.GroundTruth
 {
@@ -91,6 +92,10 @@ namespace UnityEngine.Perception.GroundTruth
         /// so that the visualization components are drawn below the UI elements.
         /// </summary>
         protected virtual void OnVisualize() {}
+        /// <summary>
+        /// Added custom visualization on a RenderTexture instead of using IMGUI.
+        /// </summary>
+        protected virtual void OnVisualize(RawImage outputView) {}
         /// <summary>
         /// In this pass, a labeler can add custom GUI controls to the scene. Important note, all labeler's additional
         /// GUIs need to use Unity's Immediate Mode GUI (IMGUI) <see href="https://docs.unity3d.com/Manual/GUIScriptingGuide.html"/> system.
@@ -188,6 +193,11 @@ namespace UnityEngine.Perception.GroundTruth
         internal void Visualize()
         {
             if (visualizationEnabled) OnVisualize();
+        }
+
+        internal void Visualize(RawImage outputView)
+        {
+            if (visualizationEnabled) OnVisualize(outputView);
         }
     }
 }
