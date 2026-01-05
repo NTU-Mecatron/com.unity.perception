@@ -8,6 +8,7 @@ using UnityEngine.Perception.GroundTruth.Utilities;
 using UnityEngine.Serialization;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting.APIUpdating;
+using UnityEngine.UI;
 
 namespace UnityEngine.Perception.GroundTruth.Labelers
 {
@@ -43,7 +44,8 @@ namespace UnityEngine.Perception.GroundTruth.Labelers
         List<BoundingBox> m_ToVisualize;
         public List<BoundingBox> Annotations => m_ToVisualize;
 
-        Vector2 m_OriginalScreenSize = Vector2.zero;
+        Vector2 m_InvertOriginalScreenSize;
+        Vector2 m_InvertSourceSize;
 
         Texture m_BoundingBoxTexture;
         Texture m_LabelTexture;
@@ -107,7 +109,7 @@ namespace UnityEngine.Perception.GroundTruth.Labelers
 
             // Record the original screen size. The screen size can change during play, and the visual bounding
             // boxes need to be scaled appropriately
-            m_OriginalScreenSize = new Vector2(Screen.width, Screen.height);
+            m_InvertOriginalScreenSize = new Vector2(1.0f / Screen.width, 1.0f / Screen.height);
 
             m_BoundingBoxTexture = Resources.Load<Texture>("outline_box");
             m_LabelTexture = Resources.Load<Texture>("solid_white");
@@ -242,8 +244,8 @@ namespace UnityEngine.Perception.GroundTruth.Labelers
 
             // The player screen can be dynamically resized during play, need to
             // scale the bounding boxes appropriately from the original screen size
-            var screenRatioWidth = Screen.width / m_OriginalScreenSize.x;
-            var screenRatioHeight = Screen.height / m_OriginalScreenSize.y;
+            var screenRatioWidth = Screen.width * m_InvertOriginalScreenSize.x;
+            var screenRatioHeight = Screen.height * m_InvertOriginalScreenSize.y;
 
             foreach (var box in m_ToVisualize)
             {
@@ -258,6 +260,59 @@ namespace UnityEngine.Perception.GroundTruth.Labelers
                 GUI.DrawTexture(labelRect, m_LabelTexture, ScaleMode.StretchToFill, true, 0, color, 0, 0);
                 GUI.Label(labelRect, box.labelName + "_" + box.instanceId, m_Style);
             }
+        }
+
+        protected override void OnVisualize(RawImage outputView)
+        {
+            if (m_ToVisualize == null || outputView == null) return;
+
+            // 1. Get the RawImage's physical bounds on the screen
+            RectTransform rectTransform = outputView.rectTransform;
+            Vector3[] corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+
+            // Physical pixel dimensions on the actual monitor
+            float physicalWidth = corners[2].x - corners[0].x;
+            float physicalHeight = corners[2].y - corners[0].y;
+
+            // 2. Identify the Source Resolution
+            // If you are rendering a texture, we must scale relative to THAT texture's size
+            // not the 'OriginalScreenSize' which might be outdated.
+            Vector2 sourceRes = new Vector2(outputView.texture.width, outputView.texture.height);
+
+            // 3. Calculate Scaling Factors
+            float scaleX = physicalWidth / sourceRes.x;
+            float scaleY = physicalHeight / sourceRes.y;
+
+            // 4. GUI Space Conversion
+            float guiLeft = corners[0].x;
+            float guiTop = Screen.height - corners[1].y;
+
+            // Use a Group to lock coordinates to the RawImage
+            GUI.BeginGroup(new Rect(guiLeft, guiTop, physicalWidth, physicalHeight));
+
+            foreach (var box in m_ToVisualize)
+            {
+                // X is local to the group (0 is left of RawImage)
+                float x = box.origin.x * scaleX;
+                float y = box.origin.y * scaleY;
+
+                float width = box.dimension.x * scaleX;
+                float height = box.dimension.y * scaleY;
+
+                InstanceIdToColorMapping.TryGetColorFromInstanceId((uint)box.instanceId, out var color);
+                GUI.color = color;
+
+                var boxRect = new Rect(x, y, width, height);
+                var labelRect = new Rect(x, y - 17, Math.Min(120, width), 17);
+
+                GUI.DrawTexture(boxRect, m_BoundingBoxTexture);
+                GUI.DrawTexture(labelRect, m_LabelTexture);
+                GUI.Label(labelRect, $"{box.labelName}_{box.instanceId}", m_Style);
+            }
+
+            GUI.EndGroup();
+            GUI.color = Color.white;
         }
     }
 }
